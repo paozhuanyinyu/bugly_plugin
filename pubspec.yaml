@@ -1,6 +1,6 @@
 name: bugly_plugin
 description: A new flutter plugin project for bugly.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/paozhuanyinyu/bugly_plugin
 
 environment:
