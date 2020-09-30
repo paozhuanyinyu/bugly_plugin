@@ -21,8 +21,17 @@
       [self putUserData:call result:result];
   }else if([@"postCatchedException" isEqualToString:call.method]){
       [self postCatchedException:call result:result];
-  }
-  else if ([@"getPlatformVersion" isEqualToString:call.method]) {
+  }else if([@"logV" isEqualToString:call.method]){
+      [self logV:call result:result];
+  }else if([@"logD" isEqualToString:call.method]){
+      [self logD:call result:result];
+  }else if([@"logI" isEqualToString:call.method]){
+      [self logI:call result:result];
+  }else if([@"logW" isEqualToString:call.method]){
+      [self logW:call result:result];
+  }else if([@"logE" isEqualToString:call.method]){
+      [self logE:call result:result];
+  }else if ([@"getPlatformVersion" isEqualToString:call.method]) {
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else {
     result(FlutterMethodNotImplemented);
@@ -30,11 +39,37 @@
 }
 
 - (void)init:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString* appId = call.arguments[@"appId"];
     BuglyConfig* config = [[BuglyConfig alloc] init];
-    config.channel = call.arguments[@"appChannel"];
-    config.version = call.arguments[@"appVersion"];
-    config.consolelogEnable = call.arguments[@"logEnabled"];
-    [Bugly startWithAppId:call.arguments[@"appId"] config:config];
+    
+    NSString *channel = call.arguments[@"appChannel"];
+    BOOL isChannelEmpty = [self isBlankString:channel];
+    if(!isChannelEmpty){
+      config.channel = channel;
+    }
+    NSString *version = call.arguments[@"appVersion"];
+    BOOL isVersionEmpty = [self isBlankString:version];
+    if(!isVersionEmpty){
+      config.version = version;
+    }
+    
+    NSNumber *reportLevel = call.arguments[@"reportLevel"];
+    if([reportLevel isEqualToNumber: [NSNumber numberWithInt:0]]){
+        config.reportLogLevel = BuglyLogLevelSilent;
+    }else if([reportLevel isEqualToNumber: [NSNumber numberWithInt:1]]){
+        config.reportLogLevel = BuglyLogLevelError;
+    }else if([reportLevel isEqualToNumber: [NSNumber numberWithInt:2]]){
+        config.reportLogLevel = BuglyLogLevelWarn;
+    }else if([reportLevel isEqualToNumber: [NSNumber numberWithInt:3]]){
+        config.reportLogLevel = BuglyLogLevelInfo;
+    }else if([reportLevel isEqualToNumber: [NSNumber numberWithInt:4]]){
+        config.reportLogLevel = BuglyLogLevelDebug;
+    }else if([reportLevel isEqualToNumber: [NSNumber numberWithInt:5]]){
+        config.reportLogLevel = BuglyLogLevelVerbose;
+    }
+    NSNumber *logEnabled = call.arguments[@"logEnabled"];
+    config.consolelogEnable = [logEnabled boolValue];
+    [Bugly startWithAppId:appId config:config];
     result([NSNumber numberWithBool:YES]);
 }
 
@@ -69,5 +104,46 @@
     }
     [Bugly reportExceptionWithCategory:5 name:@"Flutter自定义异常" reason:crash_message callStack:stackTraceArray extraInfo:data terminateApp:NO];
     result([NSNumber numberWithBool:YES]);
+}
+
+- (void)logV:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString *log = call.arguments[@"log"];
+    BLYLogv(BuglyLogLevelVerbose, log, nil);
+    result([NSNumber numberWithBool:YES]);
+}
+- (void)logD:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString *log = call.arguments[@"log"];
+    BLYLogv(BuglyLogLevelDebug, log, nil);
+    result([NSNumber numberWithBool:YES]);
+}
+- (void)logI:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString *log = call.arguments[@"log"];
+    BLYLogv(BuglyLogLevelInfo, log, nil);
+    result([NSNumber numberWithBool:YES]);
+}
+- (void)logW:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString *log = call.arguments[@"log"];
+    BLYLogv(BuglyLogLevelWarn, log, nil);
+    result([NSNumber numberWithBool:YES]);
+}
+- (void)logE:(FlutterMethodCall*)call result:(FlutterResult)result{
+    NSString *log = call.arguments[@"log"];
+    BLYLogv(BuglyLogLevelError, log, nil);
+    result([NSNumber numberWithBool:YES]);
+}
+
+- (BOOL) isBlankString:(NSString *)string {
+    if (string == nil || string == NULL) {
+        return YES;
+    }
+    
+    if ([string isKindOfClass:[NSNull class]]) {
+        return YES;
+    }
+    if ([[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length]==0) {
+        return YES;
+    }
+    return NO;
+    
 }
 @end

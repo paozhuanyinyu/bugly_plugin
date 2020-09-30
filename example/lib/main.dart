@@ -21,6 +21,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
   }
+  void init()async{
+    await BuglyPlugin.init(androidAppId: "",iosAppId: "");
+  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {

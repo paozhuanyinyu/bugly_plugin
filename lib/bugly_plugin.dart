@@ -20,7 +20,8 @@ class BuglyPlugin {
     String appChannel,
     String appVersion,
     String appPackageName,
-    int appReportDelay = 10
+    int appReportDelay = 10,
+    int reportLevel = 0 //默认是0，不上报日志；Error: 1, Wran: 2, Info: 3, Debug: 4, Verbose: 5
   })async{
     assert((Platform.isAndroid && androidAppId != null) ||
         (Platform.isIOS && iosAppId != null));
@@ -30,7 +31,8 @@ class BuglyPlugin {
       'appChannel': appChannel,
       'appVersion': appVersion,
       'appPackageName': appPackageName,
-      'appReportDelay': appReportDelay
+      'appReportDelay': appReportDelay,
+      'reportLevel': reportLevel
     };
     return _channel.invokeMethod<bool>('init',map);
   }
@@ -68,5 +70,41 @@ class BuglyPlugin {
       'error_ext': extData
     };
     return _channel.invokeMethod<bool>('postCatchedException',map);
+  }
+
+  static Future<bool> logV(String tag, String log){
+    Map<String, dynamic> map = {
+      'tag': tag,
+      'log': log
+    };
+    return _channel.invokeMethod<bool>('logV',map);
+  }
+  static Future<bool> logD(String tag, String log){
+    Map<String, dynamic> map = {
+      'tag': tag,
+      'log': log
+    };
+    return _channel.invokeMethod<bool>('logD',map);
+  }
+  static Future<bool> logI(String tag, String log){
+    Map<String, dynamic> map = {
+      'tag': tag,
+      'log': log
+    };
+    return _channel.invokeMethod<bool>('logI',map);
+  }
+  static Future<bool> logW(String tag, String log){
+    Map<String, dynamic> map = {
+      'tag': tag,
+      'log': log
+    };
+    return _channel.invokeMethod<bool>('logW',map);
+  }
+  static Future<bool> logE(String tag, String log){
+    Map<String, dynamic> map = {
+      'tag': tag,
+      'log': log
+    };
+    return _channel.invokeMethod<bool>('logE',map);
   }
 }
